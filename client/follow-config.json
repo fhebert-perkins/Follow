@@ -1,0 +1,10 @@
+{
+  "verificationurl":"<server>/verifiy",
+  "posturl":"<server>/data",
+  "elems" : [
+    "a",
+    "button",
+    ".button",
+    "img"
+  ]
+}

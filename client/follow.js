@@ -1,6 +1,6 @@
 $(document).onload(
-  $.getJSON("/follow-config.json", function(data){
-    var config = data;
+  var config = $.getJSON("/follow-config.json", function(data){
+    return data
   });
   if ($.cookie("follow-session") == null){
     var sid = guid();
@@ -23,4 +23,16 @@ $(document).onload(
     var current = window.location.pathname;
     $.post(config.posturl, {"cid":sid, "path":current})
   }
-)
+  $.each(config.elems, function(elem){
+    $(elem).addClass("follow");
+  });
+);
+$(".follow").click(function(){
+  $.post(config.posturl, {"cid":sid,
+                          "path":window.location.pathname,
+                          "action":"click",
+                          "id" : this.attr("id"),
+                          "name": this.attr("name"),
+                          "type": this.previousSibling.tagName,
+                        });
+});
