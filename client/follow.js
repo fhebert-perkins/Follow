@@ -1,8 +1,8 @@
-$(document).onload(
-  var config = $.getJSON("/follow-config.json", function(data){
-    return data
+$(document).ready(function() {
+  var config = $.getJSON("/follow-config.json", function(){
+    console.log("sucess");
   });
-  if ($.cookie("follow-session") == null){
+  if ($.cookie("follow-session") === null){
     var sid = guid();
     $.cookie("follow-session", sid)
     var browser = navigator.appName;
@@ -26,7 +26,7 @@ $(document).onload(
   $.each(config.elems, function(elem){
     $(elem).addClass("follow");
   });
-);
+});
 $(".follow").click(function(){
   $.post(config.posturl, {"cid":sid,
                           "path":window.location.pathname,
