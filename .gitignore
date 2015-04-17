@@ -3,6 +3,7 @@ jquery.cookie.js
 __pycache__/
 *.py[cod]
 
+venv/
 # C extensions
 *.so
 

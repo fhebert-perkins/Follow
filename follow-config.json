@@ -1,6 +1,6 @@
 {
-  "verificationurl":"<server>/verifiy",
-  "posturl":"<server>/data",
+  "verificationurl":"http://localhost:5000/verifiy",
+  "posturl":"http://localhost:5000/data",
   "elems" : [
     "a",
     "button",
