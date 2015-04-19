@@ -20,8 +20,10 @@ $(document).ready(function() {
         }
       $.post(config.verificationurl, payload)
     }else{
+        var sid = $.cookie("follow-session");
         var current = window.location.pathname;
         $.post(config.posturl, {"cid":sid, "path":current})
+
     }
     $.each(config.elems, function(elem){
         console.log(config.elems[elem]);
