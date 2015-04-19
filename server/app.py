@@ -1,9 +1,10 @@
 from flask import Flask, session, redirect, url_for, request
 from flask.ext.sqlalchemy import SQLAlchemy
 from crossdomain import crossdomain
+import os
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-app.secret_key = "secret"
+app.secret_key = os.urandom.encode("base_64")
 db = SQLAlchemy(app)
 
 @app.route("/admin")
@@ -23,7 +24,7 @@ def login():
 @crossdomain(origin="*")
 def verify():
     print request.form
-    return "herpder"
+    return "herpderp"
 
 @app.route("/data", methods=["POST"])
 @crossdomain(origin="*")
