@@ -11,6 +11,27 @@
     -- give the server the browser type, language, version and device type
     -- send server the domain information
 */
+
+var eventList = []
+
+function fullPath(el){ // Gets full path of element
+  var names = [];
+  while (el.parentNode){
+    if (el.id){
+      names.unshift('#'+el.id);
+      break;
+    }else{
+      if (el==el.ownerDocument.documentElement) names.unshift(el.tagName);
+      else{
+        for (var c=1,e=el;e.previousElementSibling;e=e.previousElementSibling,c++);
+        names.unshift(el.tagName+":nth-child("+c+")");
+      }
+      el=el.parentNode;
+    }
+  }
+  return names.join(" > ");
+}
+
 function get_browser(){
     var ua=navigator.userAgent,tem,M=ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
     if(/trident/i.test(M[1])){
@@ -45,16 +66,67 @@ function pushCookies(cookies){
     }
 }
 
+function elementClicked(e){
+    var path = fullPath(e.target);
+    entry.path = path;
+    entry.timestamp = Date().now();
+    entry.type = "click"
+    eventList.push(entry);
+    if (eventList.length === 10){
+        pushEvents();
+    }
+    return 0;
+}
+
+function pushEvents(){
+    var request = new XMLHttpRequest();
+    var payload = {}
+    payload.uid = userID;
+    payload.events = eventList;
+    request.open("POST", "http://"+serverHost+"/"+clientID+"/events");
+    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    request.send("payload="+JSON.stringify(payload)+";uid="+userID);
+    return 0;
+}
 
 function setup() {
     if (navigator.DoNotTrack === 0){
-        var clientID = document.findElementById('follower').getAttribute("cid"); //get client id
+        clientID = document.findElementById('follower').getAttribute("cid"); //get client id
+        serverHost = document.findElementById('follower').getAttribute("host");
+        userID = ""
         var request = new XMLHttpRequest();
+
+        if (getCookies().hasOwnProperty("followID")){
+            userID = getCookies()["followID"];
+        }else{
+            var userIDRequest = new XMLHttpRequest();
+            userIDRequest.addEventListener("load", function (){
+                userID = this.responseText;
+                getCookies()["followID"] = userID;
+            });
+            userIDRequest.open("GET", "http://"+serverHost+"/getID");
+            userIDRequest.send();
+        }
+
         var browser = get_browser();
+
         var payload = {} // initialize payload, this will be sent to the server in a post request
         payload.browser_name = browser.name // get browser name (i.e. chrome)
         payload.browser_version = broswer.version // get browser version (i.e. 4)
-        
+        payload.domain = window.location.host;
+        payload.protocol = window.location.protocol;
+        payload.path = window.location.pathname;
+        payload.cid = clientID;
+        payload.uid = userID;
+
+        // Actually send the data
+        request.open("POST", "http://"+serverHost+"/"+clientID+"/initialize");
+        request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        request.send("payload="+JSON.stringify(payload));
+
+        // Add event listeners to all buttons, links, form elements, etc.
+
+        document.getElementsByTagName("html")[0].addEventListener("click", elementClicked(e));
 
     } else {
         console.log("Hi, Just so you know we noticed that you didn't want to be tracked, so we are not tracking you.\n
