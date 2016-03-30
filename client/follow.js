@@ -2,7 +2,7 @@
  -- Check DoNotTrack -- DONE
     -- If DoNotTrack is set to true, do not do anything else
  -- Get configuration from element
- -- Check for session id
+ -- Check for session id -- DONE
     -- if NO Session id, pass this to the session initializer
     -- if there is, pass it to the session initializer
     -- kick off session initializer, while this is happening, bind events to all elements on the page
@@ -51,10 +51,10 @@ function get_browser(){
 }
 
 function getCookies(){
-    var rawCookies = document.cookies;
+    var rawCookies = document.cookie;
     var cookiesList = rawCookies.split(";");
     var cookies = {};
-    for (i=0; i<cookiesList.length(); i++){
+    for (i=0; i<cookiesList.length; i++){
         cookies[cookiesList[i].split("=")[0]] = cookiesList[i].split("=")[1];
     }
     return cookies;
@@ -72,6 +72,7 @@ function elementClicked(e){
     entry.timestamp = Date().now();
     entry.type = "click"
     eventList.push(entry);
+    console.log(entry);
     if (eventList.length === 10){
         pushEvents();
     }
@@ -90,9 +91,9 @@ function pushEvents(){
 }
 
 function setup() {
-    if (navigator.DoNotTrack === 0){
-        clientID = document.findElementById('follower').getAttribute("cid"); //get client id
-        serverHost = document.findElementById('follower').getAttribute("host");
+    if (navigator.DoNotTrack != 0){
+        clientID = document.getElementById('follower').getAttribute("cid"); //get client id
+        serverHost = document.getElementById('follower').getAttribute("host");
         userID = ""
         var request = new XMLHttpRequest();
 
@@ -104,7 +105,7 @@ function setup() {
                 userID = this.responseText;
                 getCookies()["followID"] = userID;
             });
-            userIDRequest.open("GET", "http://"+serverHost+"/getID");
+            userIDRequest.open("GET", "http://"+serverHost+"/"+clientID+"/getID");
             userIDRequest.send();
         }
 
@@ -127,11 +128,8 @@ function setup() {
         // Add event listeners to all buttons, links, form elements, etc.
 
         document.getElementsByTagName("html")[0].addEventListener("click", elementClicked(e));
-
+        window.addEventListener('popstate', pushEvents());
     } else {
-        console.log("Hi, Just so you know we noticed that you didn't want to be tracked, so we are not tracking you.\n
-        follow will not track you as long as you have DoNotTrack enabled on your browser.\n
-        We will not even store cookies in your browser, so this check will be done every time you load a site that uses follow.\n
-        Have a good day.");
+        console.log("Hi, Just so you know we noticed that you didn't want to be tracked, so we are not tracking you.\nfollow will not track you as long as you have DoNotTrack enabled on your browser.\nWe will not even store cookies in your browser, so this check will be done every time you load a site that uses follow.\nHave a good day.");
     }
 }
